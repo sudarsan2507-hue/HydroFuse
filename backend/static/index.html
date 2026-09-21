@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SEEPSENSE — Leak Detection Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+  <div class="noise-overlay" aria-hidden="true"></div>
+
+  <div class="shell">
+
+    <aside class="sidebar reveal">
+      <div class="brand">
+        <span class="brand-mark">◆</span>
+        <span class="brand-name">SEEPSENSE</span>
+      </div>
+
+      <div class="status-pill" id="status-pill">
+        <span class="pulse-dot"></span>
+        <span id="status-text">connecting…</span>
+      </div>
+      <p class="last-updated" id="last-updated"></p>
+
+      <nav class="sidenav">
+        <a class="sidenav-link active" href="#overview">Overview</a>
+        <a class="sidenav-link" href="#nodes">Sensor nodes</a>
+        <a class="sidenav-link" href="#model">Model</a>
+        <a class="sidenav-link" href="#leakdb">Real-data check</a>
+        <a class="sidenav-link" href="#map">Map</a>
+      </nav>
+
+      <div class="sidebar-actions">
+        <a class="btn btn-primary" href="/map" target="_blank" rel="noopener">Open live map →</a>
+        <a class="btn btn-ghost" href="/docs" target="_blank" rel="noopener">API reference</a>
+      </div>
+
+      <p class="sidebar-foot">Synthetic data until hardware arrives.</p>
+    </aside>
+
+    <main class="main">
+
+      <section class="hero" id="overview">
+        <div class="hero-field" id="hero-field" aria-hidden="true">
+          <div class="blob blob-a"></div>
+          <div class="blob blob-b"></div>
+          <div class="grid-lines"></div>
+
+          <!-- Static reed cluster: fills the empty strip beside the sidebar
+               without adding another moving element - no rotation, no sway. -->
+          <svg class="reeds-svg" viewBox="0 0 90 200" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+            <path d="M14,200 C10,150 20,100 12,40"  stroke="#2f5c40" stroke-width="3" fill="none" stroke-linecap="round" />
+            <path d="M30,200 C34,140 22,90 32,20"    stroke="#3a6d4a" stroke-width="3" fill="none" stroke-linecap="round" />
+            <path d="M46,200 C42,155 52,110 44,55"   stroke="#2f5c40" stroke-width="3" fill="none" stroke-linecap="round" />
+            <path d="M62,200 C66,145 56,95 64,35"    stroke="#3a6d4a" stroke-width="2.5" fill="none" stroke-linecap="round" />
+            <path d="M78,200 C74,160 82,120 76,70"   stroke="#2f5c40" stroke-width="2.5" fill="none" stroke-linecap="round" />
+          </svg>
+
+          <span class="mist-bubble"></span>
+          <span class="mist-bubble"></span>
+          <span class="mist-bubble"></span>
+
+          <svg class="wave-svg" viewBox="0 0 1200 120" preserveAspectRatio="none" aria-hidden="true">
+            <path class="wave wave-back" d="M0,60 C150,110 350,10 600,60 C850,110 1050,10 1200,60 L1200,120 L0,120 Z" />
+            <path class="wave wave-front" d="M0,70 C150,20 350,120 600,70 C850,20 1050,120 1200,70 L1200,120 L0,120 Z" />
+          </svg>
+        </div>
+        <div class="hero-content reveal">
+          <p class="eyebrow">Satellite-assisted ground sensing</p>
+          <h1>Find the leak before<br /><span class="accent">the street does.</span></h1>
+          <p class="hero-sub">
+            Ground vibration + soil moisture, corrected against satellite estimates,
+            fused into one leak-probability map — updated per node, in real time.
+          </p>
+        </div>
+        <div class="hero-ring reveal" aria-hidden="true">
+          <svg viewBox="0 0 120 120" class="ring-svg">
+            <circle cx="60" cy="60" r="52" class="ring-track" />
+            <circle cx="60" cy="60" r="52" class="ring-fill" id="risk-ring" />
+          </svg>
+          <div class="ring-label">
+            <span class="ring-value" id="stat-risk">—</span>
+            <span class="ring-caption">peak risk</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="bento reveal">
+        <div class="stat-tile">
+          <span class="stat-value" id="stat-readings">—</span>
+          <span class="stat-label">readings stored</span>
+        </div>
+        <div class="stat-tile">
+          <span class="stat-value" id="stat-nodes">—</span>
+          <span class="stat-label">active nodes</span>
+        </div>
+        <div class="stat-tile stat-tile-wide">
+          <span class="stat-value" id="stat-model">—</span>
+          <span class="stat-label">model in service</span>
+        </div>
+      </section>
+
+      <section class="section" id="nodes">
+        <h2 class="section-title reveal">Sensor nodes</h2>
+        <p class="section-sub reveal">Latest telemetry per node, with the fused leak-risk score from the last pipeline run.</p>
+        <div class="node-grid" id="node-grid"></div>
+      </section>
+
+      <section class="split-grid">
+        <section class="section" id="model">
+          <h2 class="section-title reveal">Model performance</h2>
+          <p class="section-sub reveal">RandomForest vs. XGBoost, time-based split — rain false-positive rate matters most.</p>
+          <div class="model-grid" id="model-grid">
+            <p class="empty-note reveal">No trained model yet — run <code>scripts/train_model.py</code>.</p>
+          </div>
+        </section>
+
+        <section class="section" id="leakdb">
+          <h2 class="section-title reveal">Real-data validation <span class="title-tag">LeakDB</span></h2>
+          <p class="section-sub reveal">
+            A published, real dataset (KIOS Research, Hanoi network) — network <em>pressure</em>,
+            not our sensors. Different measurement, evaluated separately.
+          </p>
+          <div class="model-grid" id="leakdb-grid">
+            <p class="empty-note reveal">Not run yet — run <code>scripts/fetch_leakdb.py</code> then <code>scripts/train_leakdb_model.py</code>.</p>
+          </div>
+        </section>
+      </section>
+
+      <section class="section map-section" id="map">
+        <h2 class="section-title reveal">Leak-probability map</h2>
+        <p class="section-sub reveal">Heatmap of fused risk across the test area, with per-node markers and alert circles above threshold.</p>
+        <div class="map-frame-wrap reveal">
+          <iframe id="map-frame" class="map-frame" src="/map" loading="lazy" title="Leak probability map"></iframe>
+          <a class="btn btn-ghost map-expand" href="/map" target="_blank" rel="noopener">Open fullscreen ↗</a>
+        </div>
+      </section>
+
+      <footer class="footer reveal">
+        <span>SEEPSENSE prototype</span>
+        <span class="footer-links"><a href="/docs">API</a> <a href="/map">Map</a></span>
+      </footer>
+
+    </main>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

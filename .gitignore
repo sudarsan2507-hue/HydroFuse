@@ -9,3 +9,6 @@ data/*.db
 data/*.parquet
 data/*.csv
 outputs/
+
+# Local Claude Code skills - not part of the shipped project.
+.claude/skills/
