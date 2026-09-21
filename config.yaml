@@ -1,0 +1,255 @@
+# ---------------------------------------------------------------------------
+# Central configuration for the satellite-assisted leak detection prototype.
+#
+# Nothing in the codebase should hardcode a coordinate, a date, a threshold or
+# a file path: every tunable value lives here and is read through
+# `backend.config.load_config()`.
+#
+# Sections for later phases (satellite, features, model, fusion, mapping) are
+# already present so that the schema stays stable as the project grows.
+# ---------------------------------------------------------------------------
+
+project:
+  name: "satellite-assisted-leak-detection"
+  # Random seed used by every stochastic component (synthetic data, model
+  # training, train/test splitting) so that runs are reproducible.
+  random_seed: 42
+
+# --- Area of interest ------------------------------------------------------
+# A small rectangular test area. Coordinates are WGS84 decimal degrees.
+area:
+  name: "test_site_a"
+  # Bounding box of the study area.
+  min_lat: 12.9600
+  max_lat: 12.9750
+  min_lon: 77.5900
+  max_lon: 77.6050
+  # Map centre (used by Folium in Phase 8).
+  center_lat: 12.9675
+  center_lon: 77.5975
+  # Grid resolution for the leak-probability raster, in metres.
+  grid_resolution_m: 25
+
+# --- Study period ----------------------------------------------------------
+# Used for the satellite pull (Phase 4) and for synthetic generation (Phase 3).
+date_range:
+  start: "2025-01-01"
+  end: "2025-03-31"
+
+# --- Sensor nodes ----------------------------------------------------------
+# Physical placement of the ESP32 nodes. `node_id` must match the value the
+# firmware puts in its JSON payload.
+nodes:
+  - node_id: "node_01"
+    lat: 12.9660
+    lon: 77.5930
+    description: "Near main distribution line"
+  - node_id: "node_02"
+    lat: 12.9700
+    lon: 77.5980
+    description: "Mid block, grass verge"
+  - node_id: "node_03"
+    lat: 12.9730
+    lon: 77.6020
+    description: "Downstream junction"
+
+# --- Sensor hardware characteristics ---------------------------------------
+sensor:
+  # Sampling rate of the accelerometer burst, in Hz.
+  accel_sample_rate_hz: 500
+  # Number of samples in one burst.
+  accel_burst_samples: 256
+  # How often a node posts a reading, in seconds.
+  reading_interval_s: 60
+  # Capacitive soil probe calibration. Raw ADC counts, lower = wetter.
+  soil_raw_min: 0
+  soil_raw_max: 4095
+  # Raw value measured in air (0% moisture) and in water (100% moisture).
+  soil_raw_dry: 3200
+  soil_raw_wet: 1300
+  # Physically plausible ranges. Payloads outside these are rejected by the
+  # API with HTTP 422 rather than being stored as bad data.
+  valid_range:
+    temp_c: [-40.0, 85.0]
+    humidity_pct: [0.0, 100.0]
+    pressure_hpa: [800.0, 1100.0]
+    mag_ut: [-5000.0, 5000.0]
+    accel_g: [-16.0, 16.0]
+
+# --- Backend / API ---------------------------------------------------------
+backend:
+  host: "127.0.0.1"
+  port: 8000
+  # SQLAlchemy URL. Relative SQLite paths are resolved against the project root.
+  database_url: "sqlite:///data/readings.db"
+  # Safety cap on GET /readings so a single query cannot pull the whole table.
+  max_readings_per_query: 5000
+  # Largest accelerometer burst the API will accept in one payload.
+  max_accel_burst_samples: 4096
+
+# --- Synthetic data (Phase 3) ----------------------------------------------
+synthetic:
+  # Where generation starts. Naive, treated as UTC. Kept fixed (not "now") so
+  # that a run is reproducible byte-for-byte given the same seed.
+  base_time: "2025-01-01T00:00:00"
+  duration_hours: 24
+  scenarios: ["no_leak", "leak", "rain_not_leak"]
+  # Which configured node the generated readings claim to be from.
+  node_id: "node_01"
+  output_dir: "data/synthetic"
+
+  # Probability that a *stored* reading has one or more fields replaced with
+  # None, simulating a peripheral read failing on the node while the rest of
+  # the payload still gets built. Such a record cannot pass the strict
+  # `ReadingIn` schema (its fields are not Optional) and would be rejected by
+  # a real /ingest call with HTTP 422 - which is realistic: a corrupted
+  # transmission is expected to be lost, not silently accepted. The `dropout`
+  # column marks these rows so tests and downstream code can tell them apart.
+  dropout_probability: 0.02
+  dropout_fields: ["soil_raw", "accel", "mag", "temp_c", "humidity_pct", "pressure_hpa"]
+  # How many of the fields above get dropped at once when dropout triggers.
+  dropout_max_fields: 2
+
+  # Footstep-like transient vibration spikes, injected into every scenario's
+  # accelerometer burst independently of the leak signature.
+  transient_spike_probability: 0.05
+  transient_spike_duration_samples: [3, 5]
+  # Spike amplitude as a multiple of accel_noise_sigma_g.
+  transient_spike_amplitude_factor: [3.0, 5.0]
+
+  # Shared accelerometer background.
+  accel_noise_sigma_g: 0.01
+  gravity_g: 1.0
+
+  # The narrow frequency band where a pressurised leak shows up, in Hz. Reused
+  # by Phase 5's band-power feature so the generator and the feature
+  # extractor always agree on where to look.
+  leak_band_hz: [40.0, 80.0]
+  # Amplitude of the continuous sinusoid injected at the band centre once a
+  # leak is present, in g.
+  leak_vibration_amplitude_g: 0.02
+
+  soil:
+    no_leak_baseline_raw: 2200
+    # +/- swing of the daily sinusoidal drift, in raw ADC counts.
+    no_leak_daily_amplitude_raw: 150
+    noise_sigma_raw: 15
+    # Steady wetting rate for the leak scenario: raw counts lost per hour.
+    leak_drift_raw_per_hour: 8.0
+    # Depth of each rain spike, in raw counts (sampled per event).
+    rain_spike_amplitude_raw: [400.0, 900.0]
+    rain_decay_time_constant_hours: 3.0
+
+  mag:
+    baseline_ut: [22.0, -8.0, 38.0]
+    # Standard deviation of each step of the slow random walk, in microtesla.
+    random_walk_step_ut: 0.05
+
+  environment:
+    # Local hour at which temperature/humidity/soil-drying peak.
+    peak_hour: 15.0
+    temp_baseline_c: 24.0
+    temp_daily_amplitude_c: 5.0
+    temp_noise_sigma_c: 0.3
+    humidity_baseline_pct: 55.0
+    humidity_daily_amplitude_pct: 10.0
+    humidity_noise_sigma_pct: 1.5
+    pressure_baseline_hpa: 1013.0
+    # Slow random-walk step, so pressure drifts rather than jumping.
+    pressure_drift_step_hpa: 0.05
+    pressure_noise_sigma_hpa: 0.5
+
+  rain:
+    events_per_run: [1, 2]
+    # Minimum spacing between two rain events, so their signatures don't overlap.
+    min_event_gap_hours: 6.0
+    humidity_jump_pct: [20.0, 30.0]
+    humidity_decay_time_constant_hours: 2.0
+    pressure_dip_hpa: [3.0, 8.0]
+    # Pressure starts dipping this many hours before the moisture spike hits.
+    pressure_lead_time_hours: 1.0
+    pressure_recovery_time_constant_hours: 1.5
+    temp_drop_c: [1.0, 3.0]
+    temp_recovery_time_constant_hours: 2.0
+
+# --- Satellite (Phase 4) ---------------------------------------------------
+satellite:
+  # Google Earth Engine cloud project ID. Leave null to force the synthetic
+  # fallback frame.
+  gee_project_id: null
+  output_path: "data/satellite.parquet"
+  s2_cloud_probability_max: 30
+  collections:
+    sentinel1: "COPERNICUS/S1_GRD"
+    sentinel2: "COPERNICUS/S2_SR_HARMONIZED"
+    smap: "NASA/SMAP/SPL4SMGP/007"
+    dem: "COPERNICUS/DEM/GLO30"
+    modis_lst: "MODIS/061/MOD11A1"
+
+# --- Feature engineering (Phase 5) -----------------------------------------
+features:
+  window_minutes: 10
+  # Rolling window, in hours, for the moisture slope feature.
+  moisture_slope_hours: 2
+  # A moisture rise faster than this (percent per hour) counts as "sharp".
+  sharp_rise_pct_per_hour: 5.0
+  # Accelerometer magnitudes above this many standard deviations are treated
+  # as footstep transients and filtered out before the FFT.
+  transient_sigma: 4.0
+  rain:
+    humidity_jump_pct: 8.0
+    pressure_drop_hpa: 2.0
+
+# --- Model (Phase 6) -------------------------------------------------------
+model:
+  # Fraction of the timeline (earliest first) used for training.
+  train_fraction: 0.7
+  output_dir: "outputs"
+  model_path: "outputs/leak_classifier.joblib"
+  random_forest:
+    n_estimators: 300
+    max_depth: 12
+  xgboost:
+    n_estimators: 300
+    max_depth: 6
+    learning_rate: 0.1
+
+# --- Fusion (Phase 7) ------------------------------------------------------
+fusion:
+  # Inverse-distance weighting exponent; higher = correction stays more local.
+  idw_power: 2.0
+  # Distance in metres beyond which a node no longer influences a grid cell.
+  idw_cutoff_m: 500.0
+  # Weight given to the classifier vs. the corrected moisture anomaly.
+  classifier_weight: 0.7
+  moisture_anomaly_weight: 0.3
+
+# --- Mapping (Phase 8) -----------------------------------------------------
+mapping:
+  output_path: "outputs/leak_map.html"
+  # Grid cells above this fused probability get a red alert marker.
+  alert_probability_threshold: 0.75
+  heatmap_radius_px: 18
+  tile_layer: "OpenStreetMap"
+
+# --- LeakDB: a real, published leak-detection dataset (KIOS Research) ------
+# Network-wide pressure/flow time series with labelled leak episodes - a
+# DIFFERENT sensing modality than our ground vibration/soil-moisture nodes
+# (there is no public dataset for that; nobody publishes raw accelerometer
+# pipe data). Used as a separate, real-data sanity check alongside the
+# synthetic-trained model, never merged into it.
+leakdb:
+  source_url: "https://raw.githubusercontent.com/KIOS-Research/LeakDB/master/CCWI-WDSA2018/Benchmarks/Hanoi_CMH.zip"
+  zip_path: "data/leakdb/Hanoi_CMH.zip"
+  extract_dir: "data/leakdb/raw"
+  network_name: "Hanoi_CMH"
+  # This zip ships 10 of LeakDB's 500 simulated scenarios (the rest require
+  # running the EPANET generator locally - out of scope for a quick sanity
+  # check). Split by scenario, not by time, so no scenario's year leaks
+  # across train/test.
+  train_scenarios: [1, 2, 3, 4, 5, 6, 7, 8]
+  test_scenarios: [9, 10]
+  # Window (in 30-minute readings) used for the pressure-drop feature.
+  pressure_change_window_readings: 4
+  model_path: "outputs/leakdb_classifier.joblib"
+  metrics_path: "outputs/leakdb_metrics.json"

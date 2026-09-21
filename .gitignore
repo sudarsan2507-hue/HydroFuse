@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Generated artefacts - all reproducible from the pipeline.
+data/*.db
+data/*.parquet
+data/*.csv
+outputs/
