@@ -4,10 +4,10 @@ __pycache__/
 .pytest_cache/
 .ipynb_checkpoints/
 
-# Generated artefacts - all reproducible from the pipeline.
-data/*.db
-data/*.parquet
-data/*.csv
+# Generated artefacts - all reproducible from the pipeline (scripts/*.py).
+# Whole directory, not just top-level files: LeakDB's extracted scenarios and
+# the synthetic parquet output both live in nested subfolders.
+data/
 outputs/
 
 # Local Claude Code skills - not part of the shipped project.
