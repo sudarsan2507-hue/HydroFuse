@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: seepsense
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+    disks:
+      # Keeps data/readings.db (and anything else under data/) across
+      # restarts and redeploys. Without this, SQLite resets every deploy.
+      - name: seepsense-data
+        mountPath: /opt/render/project/src/data
+        sizeGB: 1
