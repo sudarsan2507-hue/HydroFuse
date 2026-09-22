@@ -16,6 +16,7 @@ Typical use::
 
 from __future__ import annotations
 
+import os
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -135,15 +136,34 @@ class Config:
         return self.resolve_path(url[len(prefix):])
 
     def database_url(self) -> str:
-        """Return the SQLAlchemy URL with any relative path made absolute.
+        """Return the SQLAlchemy URL to connect to.
 
-        SQLAlchemy resolves relative SQLite paths against the current working
-        directory, which would put the database in a different place depending
-        on where the process was started.  Expanding it here avoids that.
+        A ``DATABASE_URL`` environment variable, if set, always wins - this
+        is what lets the same code run against local SQLite for development
+        and a hosted Postgres instance in production (e.g. Render's free
+        Postgres, wired up via ``fromDatabase`` in render.yaml) with no code
+        change, only an env var. Free hosting tiers that don't offer a
+        persistent disk for SQLite make this the practical default for a
+        deployed instance.
+
+        Falls back to ``backend.database_url`` in config.yaml otherwise.
+        SQLAlchemy resolves a relative SQLite path against the current
+        working directory, which would put the database in a different place
+        depending on where the process was started, so a relative sqlite:///
+        path is expanded to an absolute one here.
 
         Returns:
             A SQLAlchemy connection URL.
         """
+        env_url = os.environ.get("DATABASE_URL")
+        if env_url:
+            # Render (and some other hosts) hand out "postgres://", which
+            # SQLAlchemy 2.x's default driver no longer accepts - it wants
+            # the explicit "postgresql://" scheme.
+            if env_url.startswith("postgres://"):
+                env_url = "postgresql://" + env_url[len("postgres://"):]
+            return env_url
+
         url = str(self.get("backend.database_url"))
         if url.startswith("sqlite:///"):
             return f"sqlite:///{self.database_path().as_posix()}"

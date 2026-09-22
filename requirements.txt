@@ -18,6 +18,7 @@ fastapi>=0.110
 uvicorn[standard]>=0.27  # ASGI server that actually runs the FastAPI app
 pydantic>=2.6
 SQLAlchemy>=2.0
+psycopg2-binary>=2.9     # Postgres driver, used only when DATABASE_URL points at Postgres (e.g. hosted deploys)
 httpx>=0.27              # used by the fake-payload poster and FastAPI TestClient
 
 # --- Phase 4: satellite (Google Earth Engine) ------------------------------

@@ -1,3 +1,9 @@
+databases:
+  - name: seepsense-db
+    plan: free
+    databaseName: seepsense
+    user: seepsense
+
 services:
   - type: web
     name: seepsense
@@ -8,9 +14,11 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9
-    disks:
-      # Keeps data/readings.db (and anything else under data/) across
-      # restarts and redeploys. Without this, SQLite resets every deploy.
-      - name: seepsense-data
-        mountPath: /opt/render/project/src/data
-        sizeGB: 1
+      # Free plan has no persistent disk, so SQLite can't survive a
+      # redeploy - DATABASE_URL points backend.config.database_url() at
+      # Render's free Postgres instead (see backend/config.py). No other
+      # code change needed; SQLAlchemy abstracts the rest.
+      - key: DATABASE_URL
+        fromDatabase:
+          name: seepsense-db
+          property: connectionString
