@@ -6,7 +6,7 @@
 <title>SEEPSENSE — Leak Detection Console</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
@@ -51,14 +51,14 @@
           <div class="blob blob-b"></div>
           <div class="grid-lines"></div>
 
-          <!-- Static reed cluster: fills the empty strip beside the sidebar
+          <!-- Static signal-trace accent: fills the empty strip beside the sidebar
                without adding another moving element - no rotation, no sway. -->
           <svg class="reeds-svg" viewBox="0 0 90 200" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
-            <path d="M14,200 C10,150 20,100 12,40"  stroke="#2f5c40" stroke-width="3" fill="none" stroke-linecap="round" />
-            <path d="M30,200 C34,140 22,90 32,20"    stroke="#3a6d4a" stroke-width="3" fill="none" stroke-linecap="round" />
-            <path d="M46,200 C42,155 52,110 44,55"   stroke="#2f5c40" stroke-width="3" fill="none" stroke-linecap="round" />
-            <path d="M62,200 C66,145 56,95 64,35"    stroke="#3a6d4a" stroke-width="2.5" fill="none" stroke-linecap="round" />
-            <path d="M78,200 C74,160 82,120 76,70"   stroke="#2f5c40" stroke-width="2.5" fill="none" stroke-linecap="round" />
+            <path d="M14,200 C10,150 20,100 12,40"  stroke="var(--pulse)" stroke-width="3" fill="none" stroke-linecap="round" />
+            <path d="M30,200 C34,140 22,90 32,20"    stroke="var(--flux)" stroke-width="3" fill="none" stroke-linecap="round" />
+            <path d="M46,200 C42,155 52,110 44,55"   stroke="var(--pulse)" stroke-width="3" fill="none" stroke-linecap="round" />
+            <path d="M62,200 C66,145 56,95 64,35"    stroke="var(--flux)" stroke-width="2.5" fill="none" stroke-linecap="round" />
+            <path d="M78,200 C74,160 82,120 76,70"   stroke="var(--pulse)" stroke-width="2.5" fill="none" stroke-linecap="round" />
           </svg>
 
           <span class="mist-bubble"></span>

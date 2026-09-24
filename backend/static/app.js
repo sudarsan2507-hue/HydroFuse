@@ -86,8 +86,8 @@ async function renderNodeSparkline(container, nodeId) {
       <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
         <defs>
           <linearGradient id="${gradientId}" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="var(--water)" stop-opacity="0.35" />
-            <stop offset="100%" stop-color="var(--water)" stop-opacity="0" />
+            <stop offset="0%" stop-color="var(--flux)" stop-opacity="0.35" />
+            <stop offset="100%" stop-color="var(--flux)" stop-opacity="0" />
           </linearGradient>
         </defs>
         <path class="spark-fill" style="fill: url(#${gradientId})" d="${fillPath}"></path>
@@ -305,7 +305,7 @@ function updateRiskRing(prob) {
   const fraction = prob === null || prob === undefined ? 0 : prob;
   const offset = RING_CIRCUMFERENCE * (1 - fraction);
   ring.style.strokeDashoffset = String(offset);
-  ring.style.stroke = fraction >= 0.75 ? "var(--clay)" : fraction >= 0.4 ? "var(--gold)" : "var(--leaf)";
+  ring.style.stroke = fraction >= 0.75 ? "var(--ember)" : fraction >= 0.4 ? "var(--spark)" : "var(--pulse)";
 }
 
 // ---------- sidebar scrollspy ----------

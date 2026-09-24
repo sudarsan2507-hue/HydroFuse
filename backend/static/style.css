@@ -1,32 +1,34 @@
 /* ============================================================
-   SEEPSENSE dashboard v3 — nature palette + layout.
-   Deep forest base, living-leaf green primary, river-water blue
-   secondary, terracotta clay for alerts. Sidebar + bento grid,
-   with an animated water wave and a swaying tree in the hero.
+   SEEPSENSE dashboard v4 — electric palette.
+   Near-black void base, electric cyan primary ("pulse" - the signal),
+   hot magenta secondary ("flux" - live data), amber caution ("spark"),
+   and a punchy red-orange alert ("ember"). Bolder and higher-contrast
+   than the earlier teal/indigo/forest passes - built to feel like a
+   live signal-monitoring console, not a muted brand page.
    ============================================================ */
 
 :root {
-  --bg: #0a120d;
-  --bg-alt: #0d1712;
-  --surface: #101d16;
-  --surface-hover: #16271d;
-  --border: #1e3327;
-  --border-hover: #2c4a37;
-  --text-primary: #eef5ee;
-  --text-secondary: #8fac96;
-  --text-dim: #566d5c;
+  --bg: #05060d;
+  --bg-alt: #090b16;
+  --surface: #0d1020;
+  --surface-hover: #131730;
+  --border: #232a4a;
+  --border-hover: #37406e;
+  --text-primary: #f3f5ff;
+  --text-secondary: #8d94c2;
+  --text-dim: #565d85;
 
-  --leaf: #6fcf7f;
-  --leaf-dim: #234a2c;
-  --leaf-glow: rgba(111, 207, 127, 0.35);
-  --water: #4fb3d9;
-  --water-dim: #163a45;
-  --clay: #e07a4e;
-  --clay-glow: rgba(224, 122, 78, 0.35);
-  --gold: #d9a441;
-  --gold-dim: rgba(217, 164, 65, 0.35);
+  --pulse: #00e5ff;
+  --pulse-dim: #063542;
+  --pulse-glow: rgba(0, 229, 255, 0.4);
+  --flux: #ff2e88;
+  --flux-dim: #451a34;
+  --ember: #ff5a3c;
+  --ember-glow: rgba(255, 90, 60, 0.4);
+  --spark: #ffc93c;
+  --spark-dim: rgba(255, 201, 60, 0.35);
 
-  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Sora", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
 
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
@@ -82,7 +84,7 @@ body {
   background: linear-gradient(180deg, var(--bg-alt), var(--bg));
 }
 .brand { display: flex; align-items: center; gap: 8px; font-weight: 600; letter-spacing: 0.03em; }
-.brand-mark { color: var(--leaf); font-size: 1.15rem; }
+.brand-mark { color: var(--pulse); font-size: 1.15rem; }
 
 .status-pill {
   display: inline-flex;
@@ -102,12 +104,12 @@ body {
   transition: background 0.4s var(--ease);
 }
 .status-pill.live .pulse-dot {
-  background: var(--leaf);
-  box-shadow: 0 0 0 0 var(--leaf-glow);
+  background: var(--pulse);
+  box-shadow: 0 0 0 0 var(--pulse-glow);
   animation: pulse 1.8s infinite;
 }
 @keyframes pulse {
-  0%   { box-shadow: 0 0 0 0 var(--leaf-glow); }
+  0%   { box-shadow: 0 0 0 0 var(--pulse-glow); }
   70%  { box-shadow: 0 0 0 8px transparent; }
   100% { box-shadow: 0 0 0 0 transparent; }
 }
@@ -123,7 +125,7 @@ body {
   transition: background 0.2s var(--ease), color 0.2s var(--ease), border-color 0.2s var(--ease), transform 0.2s var(--ease);
 }
 .sidenav-link:hover { background: var(--surface-hover); color: var(--text-primary); transform: translateX(2px); }
-.sidenav-link.active { color: var(--leaf); border-left-color: var(--leaf); background: var(--leaf-dim); }
+.sidenav-link.active { color: var(--pulse); border-left-color: var(--pulse); background: var(--pulse-dim); }
 
 .sidebar-actions { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
 .sidebar-foot { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dim); margin: 0; }
@@ -145,10 +147,10 @@ body {
   transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease), border-color 0.2s var(--ease);
 }
 .btn:active { transform: translateY(1px) scale(0.98); }
-.btn-primary { background: var(--leaf); color: #07160c; font-weight: 600; }
-.btn-primary:hover { box-shadow: 0 8px 26px var(--leaf-glow); transform: translateY(-2px); }
+.btn-primary { background: var(--pulse); color: #031014; font-weight: 600; }
+.btn-primary:hover { box-shadow: 0 8px 26px var(--pulse-glow); transform: translateY(-2px); }
 .btn-ghost { background: transparent; color: var(--text-primary); border-color: var(--border); }
-.btn-ghost:hover { border-color: var(--water); color: var(--water); transform: translateY(-2px); }
+.btn-ghost:hover { border-color: var(--flux); color: var(--flux); transform: translateY(-2px); }
 
 /* ---------- hero ---------- */
 .hero {
@@ -173,8 +175,8 @@ body {
 }
 .hero-field { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
 .blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.28; transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1); will-change: transform; }
-.blob-a { width: 380px; height: 380px; background: var(--leaf); top: -140px; left: 0%; }
-.blob-b { width: 320px; height: 320px; background: var(--clay); bottom: -160px; right: 10%; opacity: 0.16; }
+.blob-a { width: 380px; height: 380px; background: var(--pulse); top: -140px; left: 0%; }
+.blob-b { width: 320px; height: 320px; background: var(--ember); bottom: -160px; right: 10%; opacity: 0.16; }
 .grid-lines {
   position: absolute; inset: 0;
   background-image: linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
@@ -197,7 +199,7 @@ body {
   position: absolute;
   bottom: 30px;
   border-radius: 50%;
-  background: var(--water);
+  background: var(--flux);
   opacity: 0;
   animation: rise 7s ease-in infinite;
 }
@@ -218,18 +220,20 @@ body {
   width: 100%;
   height: 70px;
 }
-.wave { fill: var(--water); }
-.wave-back { opacity: 0.14; animation: wave-drift 9s linear infinite; }
-.wave-front { opacity: 0.22; animation: wave-drift 6s linear infinite reverse; }
+/* Two-tone drifting signal trace (was a water wave in the nature theme) -
+   cyan and magenta layers moving at different speeds, like overlapping
+   waveforms on a scope rather than water. */
+.wave-back { fill: var(--flux); opacity: 0.16; animation: wave-drift 9s linear infinite; }
+.wave-front { fill: var(--pulse); opacity: 0.22; animation: wave-drift 6s linear infinite reverse; }
 @keyframes wave-drift {
   0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
 
 .hero-content { position: relative; z-index: 2; max-width: 560px; }
-.eyebrow { font-family: var(--font-mono); color: var(--leaf); font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; margin: 0 0 16px; }
-.hero h1 { font-size: clamp(1.9rem, 3.4vw, 2.9rem); line-height: 1.08; margin: 0 0 18px; font-weight: 600; letter-spacing: -0.01em; }
-.hero h1 .accent { color: var(--leaf); }
+.eyebrow { font-family: var(--font-mono); color: var(--pulse); font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; margin: 0 0 16px; }
+.hero h1 { font-size: clamp(1.9rem, 3.4vw, 2.9rem); line-height: 1.06; margin: 0 0 18px; font-weight: 700; letter-spacing: -0.015em; }
+.hero h1 .accent { color: var(--pulse); }
 .hero-sub { color: var(--text-secondary); font-size: 1rem; max-width: 480px; margin: 0; }
 
 /* ---------- risk ring ---------- */
@@ -247,7 +251,7 @@ body {
 .ring-track { fill: none; stroke: var(--border); stroke-width: 8; }
 .ring-fill {
   fill: none;
-  stroke: var(--clay);
+  stroke: var(--ember);
   stroke-width: 8;
   stroke-linecap: round;
   stroke-dasharray: 327;
@@ -288,8 +292,8 @@ body {
 }
 .stat-tile:hover { border-color: var(--border-hover); transform: translateY(-3px); box-shadow: 0 16px 32px -18px rgba(0,0,0,0.55); }
 .stat-tile:hover::before { opacity: 1; }
-.stat-value { font-family: var(--font-mono); font-size: 1.7rem; font-weight: 600; color: var(--leaf); position: relative; }
-.stat-tile-wide .stat-value { color: var(--water); text-transform: capitalize; }
+.stat-value { font-family: var(--font-mono); font-size: 1.7rem; font-weight: 600; color: var(--pulse); position: relative; }
+.stat-tile-wide .stat-value { color: var(--flux); text-transform: capitalize; }
 .stat-label { color: var(--text-secondary); font-size: 0.78rem; position: relative; }
 
 /* ---------- last-updated ticker ---------- */
@@ -320,7 +324,7 @@ body {
 .node-sparkline svg { width: 100%; height: 100%; overflow: visible; }
 .node-sparkline path.spark-line {
   fill: none;
-  stroke: var(--water);
+  stroke: var(--flux);
   stroke-width: 1.6;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -337,9 +341,9 @@ body {
 .section:last-of-type { border-bottom: none; }
 .section-title { font-size: 1.4rem; margin: 0 0 8px; font-weight: 600; display: flex; align-items: center; gap: 12px; }
 .section-sub { color: var(--text-secondary); margin: 0 0 26px; max-width: 620px; font-size: 0.92rem; }
-.title-tag { font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500; color: var(--water); border: 1px solid rgba(62,201,219,0.35); padding: 3px 9px; border-radius: 999px; letter-spacing: 0.04em; }
+.title-tag { font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500; color: var(--flux); border: 1px solid rgba(62,201,219,0.35); padding: 3px 9px; border-radius: 999px; letter-spacing: 0.04em; }
 .empty-note { color: var(--text-dim); font-family: var(--font-mono); font-size: 0.84rem; }
-.empty-note code { color: var(--leaf); }
+.empty-note code { color: var(--pulse); }
 
 /* ---------- split (two-column) sections ---------- */
 .split-grid {
@@ -366,9 +370,9 @@ body {
 .node-id { font-family: var(--font-mono); font-weight: 600; font-size: 1rem; }
 .node-desc { color: var(--text-dim); font-size: 0.75rem; margin-top: 4px; }
 .risk-badge { font-family: var(--font-mono); font-size: 0.7rem; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); white-space: nowrap; }
-.risk-low    { color: var(--leaf);  border-color: var(--leaf-dim); }
-.risk-medium { color: var(--gold);  border-color: var(--gold-dim); }
-.risk-high   { color: var(--clay);  border-color: rgba(224,122,78,0.4); background: rgba(224,122,78,0.1); }
+.risk-low    { color: var(--pulse);  border-color: var(--pulse-dim); }
+.risk-medium { color: var(--spark);  border-color: var(--spark-dim); }
+.risk-high   { color: var(--ember);  border-color: rgba(255,90,60,0.4); background: rgba(255,90,60,0.1); }
 .risk-unknown{ color: var(--text-dim); }
 .node-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 9px 14px; font-family: var(--font-mono); font-size: 0.8rem; }
 .node-metric-label { color: var(--text-dim); display: block; font-size: 0.68rem; }
@@ -379,13 +383,13 @@ body {
 .model-grid { display: flex; flex-direction: column; gap: 16px; }
 .model-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; transition: border-color 0.3s var(--ease), transform 0.25s var(--ease); }
 .model-card:hover { transform: translateY(-3px); border-color: var(--border-hover); }
-.model-card.best { border-color: var(--leaf-dim); box-shadow: 0 0 0 1px var(--leaf-dim) inset; }
+.model-card.best { border-color: var(--pulse-dim); box-shadow: 0 0 0 1px var(--pulse-dim) inset; }
 .model-card-title { display: flex; justify-content: space-between; align-items: center; font-weight: 600; margin-bottom: 14px; font-size: 0.94rem; }
-.best-tag { font-family: var(--font-mono); font-size: 0.65rem; color: var(--leaf); border: 1px solid var(--leaf-dim); padding: 2px 8px; border-radius: 999px; }
+.best-tag { font-family: var(--font-mono); font-size: 0.65rem; color: var(--pulse); border: 1px solid var(--pulse-dim); padding: 2px 8px; border-radius: 999px; }
 .bar-row { margin-bottom: 11px; }
 .bar-row-label { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.76rem; color: var(--text-secondary); margin-bottom: 4px; }
 .bar-track { height: 6px; background: var(--bg-alt); border-radius: 4px; overflow: hidden; }
-.bar-fill { height: 100%; background: var(--leaf); border-radius: 4px; width: 0%; transition: width 1s var(--ease); }
+.bar-fill { height: 100%; background: var(--pulse); border-radius: 4px; width: 0%; transition: width 1s var(--ease); }
 .rain-fp { margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border); font-family: var(--font-mono); font-size: 0.8rem; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 
 /* ---------- map ---------- */
@@ -396,7 +400,7 @@ body {
 /* ---------- footer ---------- */
 .footer { display: flex; justify-content: space-between; padding: 26px 0 40px; color: var(--text-dim); font-family: var(--font-mono); font-size: 0.76rem; }
 .footer a { color: var(--text-dim); text-decoration: none; margin-left: 12px; }
-.footer a:hover { color: var(--leaf); }
+.footer a:hover { color: var(--pulse); }
 
 /* ---------- responsive ---------- */
 @media (max-width: 980px) {
